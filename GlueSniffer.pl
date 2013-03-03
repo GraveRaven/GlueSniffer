@@ -5,7 +5,6 @@ use Getopt::Long;
 use LWP::Simple;
 
 my $filename = "match.txt";
-
 GetOptions('f=s' => \$filename);
 
 # Parses the match list and puts it in a dictionary
@@ -30,3 +29,28 @@ sub parse_matchlist{
 
 my %regexps = parse_matchlist $filename;
 
+my %archive = ();
+my %last_archive = ();
+
+while(1){
+    my $content = get("http://pastebin.com/archive");
+
+    # Get pastes
+    my @pastes = ($content =~/(class=\"i_p0".*\n.*\n.*)/g);
+    
+    %last_archive = %archive;
+    undef(%archive);
+
+    # Get link, type and name
+    foreach my $link (@pastes){
+        $link =~ /href="\/(.*?)">(.*?)<.*href.*">(.*?)<\//s;
+        $archive{$1} = [$2, $3];
+    }
+
+    #go through all the pastes
+    foreach my $key (keys %archive){
+        if(exists($last_archive{$key})){next;}
+        
+        $content = get("http://pastebin.com/raw.php?i=$key");
+    }
+}
