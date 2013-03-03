@@ -4,11 +4,11 @@
 # written with the regular expression
 # first and then positive numbers for a  #
 # whitelisted match and negative numbers #
-# for blacklisting                       #
-
+# for blacklisting.                      #
+# Syntax: regular expression<tab>weight  #
 
 #Whitelist
-
-
+whitetest	10
 
 #Blacklist
+blacktest	-10
