@@ -1,0 +1,14 @@
+# This file contains regexps and weights #
+# use in GlueSniffer. A hash mark can be #
+# used to comment out lines. Matches are #
+# written with the regular expression
+# first and then positive numbers for a  #
+# whitelisted match and negative numbers #
+# for blacklisting                       #
+
+
+#Whitelist
+
+
+
+#Blacklist
