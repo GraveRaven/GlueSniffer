@@ -18,9 +18,9 @@ sub parse_matchlist{
     while(my $line = <FILE>){
         chomp $line;
         if(length($line) > 0 && (substr $line, 0, 1) ne "#"){
-            (my $regexp, my $weigth) = split "\t", $line, 2;
+            (my $regexp, my $weight) = split "\t", $line, 2;
             if(eval {qr/$regexp/}){ # Make sure the regexp is valid
-                $regexps{$regexp} = 0+ $weigth; # Force the weigth to be a number
+                $regexps{$regexp} = 0+ $weight; # Force the weight to be a number
             }
         }
     }
