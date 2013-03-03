@@ -27,27 +27,37 @@ sub parse_matchlist{
     return %regexps;
 }
 
-my %regexps = parse_matchlist $filename;
+sub fetch_archive{
 
-my %archive = ();
-my %last_archive = ();
-
-while(1){
     my $content = get("http://pastebin.com/archive");
 
     # Get pastes
     my @pastes = ($content =~/(class=\"i_p0".*\n.*\n.*)/g);
     
-    %last_archive = %archive;
-    undef(%archive);
+    my %archive = ();
 
     # Get link, type and name
     foreach my $link (@pastes){
         $link =~ /href="\/(.*?)">(.*?)<.*href.*">(.*?)<\//s;
         $archive{$1} = [$2, $3];
     }
+    
+    return %archive;
+}
 
-    #go through all the pastes
+my %regexps = parse_matchlist $filename;
+
+my %archive = ();
+my %last_archive = ();
+
+while(1){
+
+    %last_archive = %archive;
+    undef(%archive);
+
+    %archive = fetch_archive;
+    
+    # Go through all the pastes
     foreach my $key (keys %archive){
         if(exists($last_archive{$key})){next;}
         
