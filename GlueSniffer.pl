@@ -4,9 +4,6 @@ use v5.14;
 use Getopt::Long;
 use LWP::Simple;
 
-my $filename = "match.txt";
-GetOptions('f=s' => \$filename);
-
 # Parses the match list and puts it in a dictionary
 sub parse_matchlist{
     my $filename = shift;
@@ -45,6 +42,24 @@ sub fetch_archive{
     return %archive;
 }
 
+# Params: string to be weighed, matchlist hash reference
+sub calculate_weight{
+    my $content = shift;
+    my $regexps_ref = shift;
+
+    my $weight = 0;
+    
+    foreach my $regexp (keys %{$regexps_ref}){
+        my $matches = () = $content =~ m/$regexp/g; # Find the number of matches
+        $weight += ($regexps_ref->{$regexp} * $matches);
+    }
+
+    return $weight;    
+}
+
+my $filename = "match.txt";
+GetOptions('f=s' => \$filename);
+
 my %regexps = parse_matchlist $filename;
 
 my %archive = ();
@@ -56,11 +71,18 @@ while(1){
     undef(%archive);
 
     %archive = fetch_archive;
-    
+  
     # Go through all the pastes
     foreach my $key (keys %archive){
         if(exists($last_archive{$key})){next;}
+ 
+        my $link = "http://pastebin.com/raw.php?i=$key";
+        my $content = get($link);
         
-        $content = get("http://pastebin.com/raw.php?i=$key");
+        if(calculate_weight($content, \%regexps) > 50){
+                print "$link\n";
+        }
     }
+
+    sleep(30);  # No use running it to often
 }

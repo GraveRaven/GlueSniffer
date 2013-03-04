@@ -8,7 +8,13 @@
 # Syntax: regular expression<tab>weight  #
 
 #Whitelist
-whitetest	10
+[a-zA-Z0-9]{32}\w	5
+[\w-]{1,26}@[\w-]{3,12}\.[a-zA-Z]{2-4}	2
+do not distribute	50
+\Wdump[s\W]	10
+[Dd][Oo][Xx]    50
 
 #Blacklist
-blacktest	-10
+GDB is free software, covered by the GNU General	-100
+CrashReporter Key	-100
+Thread [0-9]{1,3} Crashed	-100
