@@ -57,13 +57,18 @@ sub calculate_weight{
     return $weight;    
 }
 
-my $filename = "match.txt";
-GetOptions('f=s' => \$filename);
+my $match_file = "match.txt";
+my $pastes_dir = "pastes";
 
-my %regexps = parse_matchlist $filename;
+GetOptions('match=s' => \$match_file, 'directory=s' => \$pastes_dir);
+
+my %regexps = parse_matchlist $match_file;
 
 my %archive = ();
 my %last_archive = ();
+
+if(-e $pastes_dir && !-d $pastes_dir){ die "$pastes_dir is not a directory\n"; }
+if(!-e $pastes_dir && !mkdir $pastes_dir){ die "Unable to create directory $pastes_dir\n"; }
 
 while(1){
 
@@ -80,7 +85,10 @@ while(1){
         my $content = get($link);
         
         if(calculate_weight($content, \%regexps) > 50){
-                print "$link\n";
+            open FILE, ">", "$pastes_dir/$key" or die "Unable to create file $pastes_dir/$key";
+            print "$link\n";
+            print FILE $content;
+            close FILE;
         }
     }
 
