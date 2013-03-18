@@ -56,7 +56,7 @@ sub calculate_weight{
         my $matches = () = $content =~ m/$regexp/g; # Find the number of matches
         if($matches){
             $weight += ($regexps_ref->{$regexp} * $matches);
-            $debug_regs .= "$matches * $regexp = " . $regexp_refs->{$regexp}*$matches . "\n";
+            $debug_regs .= "$matches * $regexp = " . $regexps_ref->{$regexp}*$matches . "\n";
         }
     }
 
