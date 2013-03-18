@@ -46,21 +46,47 @@ sub fetch_archive{
 sub calculate_weight{
     my $content = shift;
     my $regexps_ref = shift;
+    my $key = shift; #for debug
 
     my $weight = 0;
-    
+
+    my $debug_regs = "";
+            
     foreach my $regexp (keys %{$regexps_ref}){
         my $matches = () = $content =~ m/$regexp/g; # Find the number of matches
-        $weight += ($regexps_ref->{$regexp} * $matches);
+        if($matches){
+            $weight += ($regexps_ref->{$regexp} * $matches);
+            $debug_regs .= "$matches * $regexp\n";
+        }
+    }
+
+    if($weight >= 50){
+        my $date = `date "+%F %R"`;
+        open DEBUG, ">>", "debug.txt";
+        print DEBUG "$date $key\n$debug_regs\n";
+        close DEBUG;
     }
 
     return $weight;    
 }
 
+my $helptext = 
+"Usage: $0 <options>
+
+    -h  --help      Shows this information
+    -m  --match     The name of file containing the match strings (Default: match.txt)
+    -d  --dir       The directory where pastes will be saved (Default: pastes)";
+
 my $match_file = "match.txt";
 my $pastes_dir = "pastes";
+my $help;
 
-GetOptions('match=s' => \$match_file, 'directory=s' => \$pastes_dir);
+GetOptions('match=s' => \$match_file, 'dir=s' => \$pastes_dir, 'help' => \$help);
+
+if($help){
+    print $helptext, "\n";
+    exit;
+}
 
 my %regexps = parse_matchlist $match_file;
 
@@ -84,13 +110,16 @@ while(1){
         my $link = "http://pastebin.com/raw.php?i=$key";
         my $content = get($link);
         
-        if(calculate_weight($content, \%regexps) > 50){
+        if(calculate_weight($content, \%regexps, $key) >= 50){
             open FILE, ">", "$pastes_dir/$key" or die "Unable to create file $pastes_dir/$key";
+            binmode(FILE, ":utf8");
             print "$link\n";
             print FILE $content;
             close FILE;
         }
+
+        sleep(2);   # Seems I'm still getting banned
     }
 
-    sleep(30);  # No use running it to often
+    sleep(20);  # No use running it to often
 }
