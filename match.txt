@@ -8,13 +8,43 @@
 # Syntax: regular expression<tab>weight  #
 
 #Whitelist
-[a-zA-Z0-9]{32}\w	5
-[\w-]{1,26}@[\w-]{3,12}\.[a-zA-Z]{2-4}	2
+[\W:][a-fA-F0-9]{32}[\W:]	3
+[\w]{1,26}@[\w]{3,12}\.[a-zA-Z]{2,4}	2
 do not distribute	50
-\Wdump[s\W]	10
-[Dd][Oo][Xx]    50
+\W(?<!\/)dump(?!\()[s\W]\W	10
+(^|\(| +)[Dd][Oo][Xx]\W	49
+password\d{2,}	10
+[Hh][Aa][Cc][Kk][Ee][DdRr]	20
+[Ee][Xx][Pp][Ll][Oo][Ii][Tt]	20
+\W[Ff][Bb][Ii]\W	20
+\W[Cc][Ii][Aa]\W	20
+Address	1
 
 #Blacklist
 GDB is free software, covered by the GNU General	-100
 CrashReporter Key	-100
 Thread [0-9]{1,3} Crashed	-100
+[Dd][Ee][Bb][Uu][Gg]	-10
+[a-fA-F]{32}	-5
+[0-9]{32}	-5
+[-d][-rwx]{9}\Wi	-5
+Minecraft	-50
+Buildcraft	-50
+Disk\(s\)\.+DOX	-50
+\d{4}-\d{2}-\d{2} \d{1,2}:\d{1,2}:\d{1,3}\.\d{1,3} \[\d{1,4}:\d{1,3}\]	-2
+
+#IRC filters
+\d\d:\d\d <\w+>	-1
+\d\d:\d\d [PA]M	-1
+<\w+>	-1
+
+#Porn filter
+[Bb][Rr][Aa][Zz][Zz][Ee][Rr][Ss]	-500
+[Rr][Ee][Aa][Ll][Ii][Tt][Yy][Kk][Ii][Nn][Gg][Ss]	-500
+[Bb][Aa][Nn][Gg][Bb][Rr][Oo][Ss]	-500
+[Mm][Oo][Ff][Oo][Ss]	-50
+Premium	-20
+[Nn][Aa][Uu][Gg][Hh][Tt][Yy]\W?[Aa][Mm][Ee][Rr][Ii][Cc][Aa]	-500
+[Pp][Oo][Rr][Nn][Bb][Rr][Oo][Ss]	-500
+Adult XXX	-500
+
