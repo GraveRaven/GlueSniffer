@@ -56,7 +56,7 @@ sub calculate_weight{
         my $matches = () = $content =~ m/$regexp/g; # Find the number of matches
         if($matches){
             $weight += ($regexps_ref->{$regexp} * $matches);
-            $debug_regs .= "$matches * $regexp\n";
+            $debug_regs .= "$matches * $regexp = " . $regexp_refs->{$regexp}*$matches . "\n";
         }
     }
 
@@ -64,7 +64,7 @@ sub calculate_weight{
         my $date = `date "+%F %R"`;
         chomp $date;
         open DEBUG, ">>", "debug.txt";
-        print DEBUG "$date $key\n$debug_regs\n";
+        print DEBUG "$date $key\n$debug_regs\nTotal: $weight\n";
         close DEBUG;
     }
 
