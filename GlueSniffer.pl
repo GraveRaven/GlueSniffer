@@ -62,6 +62,7 @@ sub calculate_weight{
 
     if($weight >= 50){
         my $date = `date "+%F %R"`;
+        chomp $date;
         open DEBUG, ">>", "debug.txt";
         print DEBUG "$date $key\n$debug_regs\n";
         close DEBUG;
