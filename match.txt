@@ -8,11 +8,11 @@
 # Syntax: regular expression<tab>weight  #
 
 #Whitelist
-[\W:][a-fA-F0-9]{32}[\W:]	3
+[\W][a-fA-F0-9]{32}[\W]	2
 [\w]{1,26}@[\w]{3,12}\.[a-zA-Z]{2,4}	2
 do not distribute	50
-\W(?<!\/)dump(?!\()[s\W]\W	10
-(^|\(| +)[Dd][Oo][Xx]\W	49
+\W(?<!\/)dump(?!\()[s\W]\W	5
+#(^|\(| +)[Dd][Oo][Xx]\W	49
 password\d{2,}	10
 \W[Hh][Aa][Cc][Kk][Ee][Dd]\W	20
 \W[Ee][Xx][Pp][Ll][Oo][Ii][Tt]\W	20
@@ -22,6 +22,7 @@ GDB is free software, covered by the GNU General	-100
 CrashReporter Key	-500
 Thread [0-9]{1,3} [Cc]rashed	-100
 [Dd][Ee][Bb][Uu][Gg]	-20
+Traceback \(most recent call last\):	-100
 [a-fA-F]{32}	-5
 [0-9]{32}	-5
 [-d][-rwx]{9}\Wi	-5
@@ -31,23 +32,29 @@ Disk\(s\)\.+DOX	-50
 \d{4}-\d{2}-\d{2} \d{1,2}:\d{1,2}:\d{1,3}\.\d{1,3} \[\d{1,4}:\d{1,3}\]	-2
 <key>SysInfoCrashReporterKey<\/key>	-500
 com\.apple	-5
-rapidgator\.net	-3
-com\.sun\.
+com\.sun\.	-5
 freebiejeebies	-50
-letitbit\.net	-3
 [Gg][Aa][Mm][Ee]	-2
 [Hh][Tt][Mm][Ll]>	-30
 [\W:][a-fA-F0-9]{32}@[0-9]{10}	-6
 core\.rdio	-3
+zellor	-5
+QUERY	-1
+[Hh][Tt][Tt][Pp][Ss]?://[^ ]*[a-fA-F0-9]{32}	-2
+[Tt]humbnail	-3
+\d{4}-\d\d-\d\d \d\d:\d\d:\d\d\.\d{6} \[ALERT\]	-5
+\d{4}-\d\d-\d\d \d\d:\d\d:\d\d\.\d{6} \[INFO\]	-5
+\ned2k	-2
 
 #Rediculous workarounds
 TDSS rootkit removing tool	-10000
-OTL by OldTimer	-500
+OTL by OldTimer	-10000
+SystemLook	-10000
 
 #IRC filters
-\d\d:\d\d <\w+>	-1
-\d\d:\d\d [PA]M	-1
-<\w+>	-1
+#\d\d:\d\d <\w+>	-1
+#\d\d:\d\d [PA]M	-1
+#<\w+>	-1
 
 #Porn filter
 [Bb][Rr][Aa][Zz][Zz][Ee][Rr][Ss]	-500

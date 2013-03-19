@@ -64,7 +64,7 @@ sub calculate_weight{
         my $date = `date "+%F %R"`;
         chomp $date;
         open DEBUG, ">>", "debug.txt";
-        print DEBUG "$date $key\n$debug_regs\nTotal: $weight\n";
+        print DEBUG "$date $key\n" , $debug_regs, "Total: $weight\n\n";
         close DEBUG;
     }
 
