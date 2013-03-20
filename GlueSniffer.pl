@@ -14,9 +14,9 @@ sub parse_matchlist{
     while(my $line = <FILE>){
         chomp $line;
         if(length($line) > 0 && (substr $line, 0, 1) ne "#"){
-            (my $regexp, my $weight) = split "\t", $line, 2;
+            (my $regexp, my $weight, my $uniq) = split "\t", $line, 3;
             if(eval {qr/$regexp/}){ # Make sure the regexp is valid
-                $regexps{$regexp} = 0+ $weight; # Force the weight to be a number
+                $regexps{$regexp} = [0+ $weight, $uniq]; # Force the weight to be a number
             }
         }
     }
@@ -48,27 +48,32 @@ sub calculate_weight{
     my $regexps_ref = shift;
     my $key = shift; #for debug
 
-    my $weight = 0;
+    my $total_weight = 0;
 
     my $debug_regs = "";
             
     foreach my $regexp (keys %{$regexps_ref}){
-        my $matches = () = $content =~ m/$regexp/g; # Find the number of matches
-        if($matches){
-            $weight += ($regexps_ref->{$regexp} * $matches);
-            $debug_regs .= "$matches * $regexp = " . $regexps_ref->{$regexp}*$matches . "\n";
+        my $nr_matches = (my @matches) = $content =~ m/$regexp/g; # Find the number of matches
+        if($nr_matches){
+            (my $weight, my $uniq) = @{$regexps_ref->{$regexp}};
+            if(defined($uniq)){
+                $nr_matches = values{map{$_ => 1} @matches};
+            }
+
+            $total_weight += ($weight * $nr_matches);
+            $debug_regs .= "$nr_matches * $regexp = " . $weight * $nr_matches . "\n";
         }
     }
 
-    if($weight >= 50){
+    if($total_weight >= 50){
         my $date = `date "+%F %R"`;
         chomp $date;
         open DEBUG, ">>", "debug.txt";
-        print DEBUG "$date $key\n" , $debug_regs, "Total: $weight\n\n";
+        print DEBUG "$date $key\n" , $debug_regs, "Total: $total_weight\n\n";
         close DEBUG;
     }
 
-    return $weight;    
+    return $total_weight;    
 }
 
 my $helptext = 

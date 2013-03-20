@@ -1,15 +1,17 @@
-# This file contains regexps and weights #
-# use in GlueSniffer. A hash mark can be #
-# used to comment out lines. Matches are #
-# written with the regular expression    #
-# first and then positive numbers for a  #
-# whitelisted match and negative numbers #
-# for blacklisting.                      #
-# Syntax: regular expression<tab>weight  #
+#############################################################
+# This file contains regexps and weights use in GlueSniffer.#
+# A hash mark can be used to comment out lines.             #
+# Matches are written with the regular expression first and #
+# then positive numbers for a whitelisted match             #
+# and negative numbers for blacklisting.                    #
+# A X can be appended after the weight to only count unique #
+# values of that expression.                                #
+# Syntax: regular expression<tab>weight<tab>unique          #
+#############################################################
 
 #Whitelist
-[\W][a-fA-F0-9]{32}[\W]	2
-[\w]{1,26}@[\w]{3,12}\.[a-zA-Z]{2,4}	2
+[\W][a-fA-F0-9]{32}[\W]	2	X
+[\w]{1,26}@[\w]{3,12}\.[a-zA-Z]{2,4}	2	X
 do not distribute	50
 \W(?<!\/)dump(?!\()[s\W]\W	5
 #(^|\(| +)[Dd][Oo][Xx]\W	49
@@ -52,9 +54,14 @@ OTL by OldTimer	-10000
 SystemLook	-10000
 
 #IRC filters
-#\d\d:\d\d <\w+>	-1
+\d\d:\d\d <\w+>	-2
 #\d\d:\d\d [PA]M	-1
-#<\w+>	-1
+<@\w+>	-1
+<\+\w+>	-1
+was kicked from	-20
+
+
+
 
 #Porn filter
 [Bb][Rr][Aa][Zz][Zz][Ee][Rr][Ss]	-500
