@@ -54,7 +54,7 @@ Thread \d+ name:	-20
 No threat detected	-20
 <package label	-5
 
-#Rediculous workarounds
+#Ridiculous workarounds
 TDSS rootkit removing tool	-10000
 OTL by OldTimer	-10000
 SystemLook	-10000
