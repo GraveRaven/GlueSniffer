@@ -1,0 +1,7 @@
+CREATE DATABASE gluesniffer;
+CREATE USER 'gluesniffer'@'localhost' identified by 'nosebleed';
+GRANT ALL ON gluesniffer.* to 'gluesniffer'@'localhost';
+CREATE TABLE gluesniffer.finding (id SMALLINT NOT NULL AUTO_INCREMENT, pasteid CHAR(10) NOT NULL, time TIMESTAMP NOT NULL, content MEDIUMTEXT NOT NULL, PRIMARY KEY(id));
+CREATE TABLE gluesniffer.category (id SMALLINT NOT NULL AUTO_INCREMENT, name VARCHAR(50) NOT NULL, PRIMARY KEY(id));
+CREATE TABLE gluesniffer.whitelist (id SMALLINT NOT NULL AUTO_INCREMENT, expression VARCHAR(100) NOT NULL, weight SMALLINT NOT NULL, onlyonce BOOL NOT NULL DEFAULT 0, category SMALLINT, regname VARCHAR(100) NOT NULL, PRIMARY KEY(id), FOREIGN KEY (category) REFERENCES category(id));
+CREATE TABLE gluesniffer.blacklist (id SMALLINT NOT NULL AUTO_INCREMENT, expression VARCHAR(100) NOT NULL, weight SMALLINT NOT NULL, onlyonce BOOL NOT NULL DEFAULT 0, category SMALLINT, regname VARCHAR(100) NOT NULL, PRIMARY KEY(id), FOREIGN KEY (category) REFERENCES category(id));
