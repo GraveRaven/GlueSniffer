@@ -22,22 +22,25 @@ sub parse_matchlist{
 
     my $dbh = db_connect;
    
-    my $sth = $dbh->prepare("SELECT expression, weight, onlyonce, category, regname FROM whitelist");
-    $sth->execute;
+    foreach $list (("whitelist", "blacklist")){
 
-    my %regexps;
+        my $sth = $dbh->prepare("SELECT expression, weight, onlyonce, category, regname FROM $list");
+        $sth->execute;
+
+        my %regexps;
     
-    while(my @row = $sth->fetchrow_array){
-        my $regexp = $row[0];
-        my $weight = $row[1];
-        my $uniq = $row[2];
-        print "Adding $regexp to list\n";
-        if(eval {qr/$regexp/}){ # Make sure the regexp is valid
-            $regexps{$regexp} = [0+ $weight, $uniq]; # Force the weight to be a number
+        while(my @row = $sth->fetchrow_array){
+            my $regexp = $row[0];
+            my $weight = $row[1];
+            my $uniq = $row[2];
+            if(eval {qr/$regexp/}){ # Make sure the regexp is valid
+                $regexps{$regexp} = [0+ $weight, $uniq]; # Force the weight to be a number
+            }
         }
-    }
-    
+    }    
+
     $dbh->disconnect;
+
     return %regexps;
 }
 
@@ -72,7 +75,6 @@ sub calculate_weight{
     foreach my $regexp (keys %{$regexps_ref}){
         my $nr_matches = (my @matches) = $content =~ m/$regexp/g; # Find the number of matches
         if($nr_matches){
-            print "Found matches\n";
             (my $weight, my $uniq) = @{$regexps_ref->{$regexp}};
             if(defined($uniq)){
                 $nr_matches = values{map{$_ => 1} @matches};
