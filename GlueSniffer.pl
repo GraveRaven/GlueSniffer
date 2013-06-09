@@ -1,26 +1,43 @@
 #!/usr/bin/perl
 
-use v5.14;
+use warnings;
+use strict;
+use v5.18;
 use Getopt::Long;
 use LWP::Simple;
+use DBI;
+
+our $db_user = "gluesniffer";
+our $db_passwd = "nosebleed";
+our $db_name = "gluesniffer";
+our $db_host = "localhost";
+
+#Connect to database
+sub db_connect{
+    return DBI->connect("dbi:mysql:database=$db_name;host=$db_host", $db_user, $db_passwd);
+}
 
 # Parses the match list and puts it in a dictionary
 sub parse_matchlist{
-    my $filename = shift;
-    open FILE, $filename;
+
+    my $dbh = db_connect;
+   
+    my $sth = $dbh->prepare("SELECT expression, weight, onlyonce, category, regname FROM whitelist");
+    $sth->execute;
 
     my %regexps;
-
-    while(my $line = <FILE>){
-        chomp $line;
-        if(length($line) > 0 && (substr $line, 0, 1) ne "#"){
-            (my $regexp, my $weight, my $uniq) = split "\t", $line, 3;
-            if(eval {qr/$regexp/}){ # Make sure the regexp is valid
-                $regexps{$regexp} = [0+ $weight, $uniq]; # Force the weight to be a number
-            }
+    
+    while(my @row = $sth->fetchrow_array){
+        my $regexp = $row[0];
+        my $weight = $row[1];
+        my $uniq = $row[2];
+        print "Adding $regexp to list\n";
+        if(eval {qr/$regexp/}){ # Make sure the regexp is valid
+            $regexps{$regexp} = [0+ $weight, $uniq]; # Force the weight to be a number
         }
     }
-
+    
+    $dbh->disconnect;
     return %regexps;
 }
 
@@ -55,6 +72,7 @@ sub calculate_weight{
     foreach my $regexp (keys %{$regexps_ref}){
         my $nr_matches = (my @matches) = $content =~ m/$regexp/g; # Find the number of matches
         if($nr_matches){
+            print "Found matches\n";
             (my $weight, my $uniq) = @{$regexps_ref->{$regexp}};
             if(defined($uniq)){
                 $nr_matches = values{map{$_ => 1} @matches};
@@ -66,6 +84,7 @@ sub calculate_weight{
     }
 
     if($total_weight >= 50){
+        print "Printing debug\n";
         my $date = `date "+%F %R"`;
         chomp $date;
         open DEBUG, ">>", "debug.txt";
@@ -117,11 +136,10 @@ while(1){
         my $content = get($link);
         
         if(calculate_weight($content, \%regexps, $key) >= 50){
-            open FILE, ">", "$pastes_dir/$key" or die "Unable to create file $pastes_dir/$key";
-            binmode(FILE, ":utf8");
-            print "$link\n";
-            print FILE $content;
-            close FILE;
+            my $dbh = db_connect;
+            my $sth = $dbh->prepare("INSERT INTO finding (pasteid, time, content) values (?,NOW(),?)");
+            $sth->execute($key, $content); 
+            $dbh->disconnect;
         }
 
         sleep(2);   # Seems I'm still getting banned
