@@ -101,27 +101,20 @@ my $helptext =
 "Usage: $0 <options>
 
     -h  --help      Shows this information
-    -m  --match     The name of file containing the match strings (Default: match.txt)
-    -d  --dir       The directory where pastes will be saved (Default: pastes)";
+"
 
-my $match_file = "match.txt";
-my $pastes_dir = "pastes";
 my $help;
 
-GetOptions('match=s' => \$match_file, 'dir=s' => \$pastes_dir, 'help' => \$help);
+GetOptions('help' => \$help);
 
 if($help){
     print $helptext, "\n";
     exit;
 }
-
-my %regexps = parse_matchlist $match_file;
+my %regexps = parse_matchlist;
 
 my %archive = ();
 my %last_archive = ();
-
-if(-e $pastes_dir && !-d $pastes_dir){ die "$pastes_dir is not a directory\n"; }
-if(!-e $pastes_dir && !mkdir $pastes_dir){ die "Unable to create directory $pastes_dir\n"; }
 
 while(1){
 
