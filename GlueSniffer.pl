@@ -21,13 +21,13 @@ sub db_connect{
 sub parse_matchlist{
 
     my $dbh = db_connect;
-   
-    foreach $list (("whitelist", "blacklist")){
+    my %regexps;
+    
+    foreach my $list (("whitelist", "blacklist")){
 
         my $sth = $dbh->prepare("SELECT expression, weight, onlyonce, category, regname FROM $list");
         $sth->execute;
 
-        my %regexps;
     
         while(my @row = $sth->fetchrow_array){
             my $regexp = $row[0];
@@ -101,7 +101,7 @@ my $helptext =
 "Usage: $0 <options>
 
     -h  --help      Shows this information
-"
+";
 
 my $help;
 
