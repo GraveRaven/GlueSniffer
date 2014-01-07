@@ -73,11 +73,11 @@ sub calculate_weight{
     my $debug_regs = "";
             
     foreach my $regexp (keys %{$regexps_ref}){
-        my $nr_matches = (my @matches) = $content =~ m/$regexp/g; # Find the number of matches
+        my $nr_matches =()= $content =~ m/$regexp/g; # Find the number of matches
         if($nr_matches){
             (my $weight, my $uniq) = @{$regexps_ref->{$regexp}};
             if(defined($uniq)){
-                $nr_matches = values{map{$_ => 1} @matches};
+                $nr_matches = 1;
             }
 
             $total_weight += ($weight * $nr_matches);
@@ -95,6 +95,22 @@ sub calculate_weight{
     }
 
     return $total_weight;    
+}
+
+sub save_paste{
+    my $key = shift;
+    my $content = shift;
+
+    my $dbh = db_connect;
+    my $sth = $dbh->prepare("SELECT content FROM finding WHERE pasteid = ?");
+    $sth->execute($key);
+    
+    if($sth->rows == 0){
+        $sth = $dbh->prepare("INSERT INTO finding (pasteid, time, content) values (?,NOW(),?)");
+        $sth->execute($key, $content); 
+    }
+    
+    $dbh->disconnect;
 }
 
 my $helptext = 
@@ -129,12 +145,9 @@ while(1){
  
         my $link = "http://pastebin.com/raw.php?i=$key";
         my $content = get($link);
-        
+        next unless $content;
         if(calculate_weight($content, \%regexps, $key) >= 50){
-            my $dbh = db_connect;
-            my $sth = $dbh->prepare("INSERT INTO finding (pasteid, time, content) values (?,NOW(),?)");
-            $sth->execute($key, $content); 
-            $dbh->disconnect;
+            save_paste($key, $content);
         }
 
         sleep(2);   # Seems I'm still getting banned
