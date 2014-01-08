@@ -74,7 +74,7 @@ sub calculate_weight{
     my $debug_regs = "";
             
     foreach my $regexp (keys %{$regexps_ref}){
-        my $nr_matches =()= $content =~ m/$regexp/g; # Find the number of matches
+        my $nr_matches =(my @matches)= $content =~ m/$regexp/g; # Find the number of matches
         if($nr_matches){
             (my $weight, my $uniq) = @{$regexps_ref->{$regexp}};
             if($uniq){
