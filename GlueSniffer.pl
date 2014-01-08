@@ -47,6 +47,7 @@ sub parse_matchlist{
 sub fetch_archive{
 
     my $content = get("http://pastebin.com/archive");
+    return unless $content;
 
     # Get pastes
     my @pastes = ($content =~/(class=\"i_p0".*\n.*\n.*)/g);
@@ -76,8 +77,8 @@ sub calculate_weight{
         my $nr_matches =()= $content =~ m/$regexp/g; # Find the number of matches
         if($nr_matches){
             (my $weight, my $uniq) = @{$regexps_ref->{$regexp}};
-            if(defined($uniq)){
-                $nr_matches = 1;
+            if($uniq){
+                $nr_matches = values{map{$_ => 1} @matches}; #makes sure every unique instance of a match is only counted once.
             }
 
             $total_weight += ($weight * $nr_matches);
@@ -138,19 +139,21 @@ while(1){
     undef(%archive);
 
     %archive = fetch_archive;
-  
-    # Go through all the pastes
-    foreach my $key (keys %archive){
-        if(exists($last_archive{$key})){next;}
+    
+    if(%archive){
+        # Go through all the pastes
+        foreach my $key (keys %archive){
+            if(exists($last_archive{$key})){next;}
  
-        my $link = "http://pastebin.com/raw.php?i=$key";
-        my $content = get($link);
-        next unless $content;
-        if(calculate_weight($content, \%regexps, $key) >= 50){
-            save_paste($key, $content);
-        }
+            my $link = "http://pastebin.com/raw.php?i=$key";
+            my $content = get($link);
+            next unless $content;
+            if(calculate_weight($content, \%regexps, $key) >= 50){
+                save_paste($key, $content);
+            }
 
-        sleep(2);   # Seems I'm still getting banned
+            sleep(2);   # Seems I'm still getting banned
+        }
     }
 
     sleep(20);  # No use running it to often
