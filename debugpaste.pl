@@ -1,9 +1,15 @@
 #!/usr/bin/perl
 
+############################
+#                          #
+# Takes pasteid's as input #
+# Prints debug info        #
+#                          #
+############################
+
 use warnings;
 use strict;
 use v5.18;
-use Getopt::Long;
 use LWP::Simple;
 use DBI;
 
@@ -44,31 +50,11 @@ sub parse_matchlist{
     return %regexps;
 }
 
-sub fetch_archive{
-
-    my $content = get("http://pastebin.com/archive");
-    return unless $content;
-
-    # Get pastes
-    my @pastes = ($content =~/(class=\"i_p0".*\n.*\n.*)/g);
-    
-    my %archive = ();
-
-    # Get link, type and name
-    foreach my $link (@pastes){
-        $link =~ /href="\/(.*?)">(.*?)<.*href.*">(.*?)<\//s;
-        $archive{$1} = [$2, $3];
-    }
-    
-    return %archive;
-}
-
 # Params: string to be weighed, matchlist hash reference
 sub calculate_weight{
     my $content = shift;
     my $regexps_ref = shift;
-    my $key = shift; #for debug
-
+    my $key = shift;
     my $total_weight = 0;
 
     my $debug_regs = "";
@@ -86,66 +72,24 @@ sub calculate_weight{
         }
     }
 
+        print "$key\n" , $debug_regs, "Total: $total_weight\n\n";
+
     return $total_weight;    
 }
 
-sub save_paste{
-    my $key = shift;
-    my $content = shift;
 
-    my $dbh = db_connect;
-    my $sth = $dbh->prepare("SELECT content FROM finding WHERE pasteid = ?");
-    $sth->execute($key);
-    
-    if($sth->rows == 0){
-        $sth = $dbh->prepare("INSERT INTO finding (pasteid, time, content) values (?,NOW(),?)");
-        $sth->execute($key, $content); 
-    }
-    
-    $dbh->disconnect;
-}
+my @pastes = @ARGV;
 
-my $helptext = 
-"Usage: $0 <options>
-
-    -h  --help      Shows this information
-";
-
-my $help;
-
-GetOptions('help' => \$help);
-
-if($help){
-    print $helptext, "\n";
-    exit;
-}
 my %regexps = parse_matchlist;
 
-my %archive = ();
-my %last_archive = ();
 
-while(1){
+my $dbh = db_connect;
+foreach my $pasteid (@pastes){
+    chomp($pasteid);
 
-    %last_archive = %archive;
-    undef(%archive);
-
-    %archive = fetch_archive;
+    my $sth = $dbh->prepare("SELECT content FROM finding WHERE pasteid = ?");
+    $sth->execute($pasteid);
     
-    if(%archive){
-        # Go through all the pastes
-        foreach my $key (keys %archive){
-            if(exists($last_archive{$key})){next;}
- 
-            my $link = "http://pastebin.com/raw.php?i=$key";
-            my $content = get($link);
-            next unless $content;
-            if(calculate_weight($content, \%regexps, $key) >= 50){
-                save_paste($key, $content);
-            }
-
-            sleep(2);
-        }
-    }
-
-    sleep(20);  # No use running it to often
+    my @row = $sth->fetchrow_array;
+    calculate_weight($row[0], \%regexps, $pasteid)
 }
